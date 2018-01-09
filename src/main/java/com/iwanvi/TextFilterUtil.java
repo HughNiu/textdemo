@@ -38,6 +38,7 @@ public class TextFilterUtil {
 
             JSONObject json = JSONObject.fromObject(userData);
             JSONObject result = HttpRequestUtils.httpPost(REQUEST_URL, json);
+            System.out.println(result);
 
             json = JSONObject.fromObject(result);
             return json;
@@ -54,19 +55,26 @@ public class TextFilterUtil {
      * @param text
      * @return
      */
-    public static String getRetouchedText(String type, Integer userId, String text) {
+    public static String getRetouchedText(String type, Integer userId, String text) throws TextFilterException {
         Map<String, Object> filterResult = filter(type, userId, text);
         int score = MapUtils.getIntValue(filterResult, "score", 0); // 拦截指数
         if (filterResult != null
-                && MapUtils.getIntValue(filterResult, "code", 0) == 1100
-                && score > INTERCEPT_SCORE) {
+                && MapUtils.getIntValue(filterResult, "code", 0) == 1100) {
+
             Map detail = MapUtils.getMap(filterResult, "detail");
             LOGGER.info("数美垃圾文本识别: uid = " + userId + "text = " + text + ", detail = " + detail);
-            return (String) detail.get("filteredText");
-        } else {
-            // 请求失败抛出异常
+
+            if (score > INTERCEPT_SCORE) { // 需要拦截
+                if (detail.containsKey("filteredText")) { // 数美返回修饰过的文本
+                    return (String) detail.get("filteredText");
+                } else { // 文本被拦截, 但未命中任何名单, 无修饰过的文本
+                    throw new TextFilterException("文本被拦截, 但未命中任何名单");
+                }
+            } else {
+                return text; // 直接放行
+            }
         }
-        return null;
+        return null; // 请求失败返回null
     }
 
 }

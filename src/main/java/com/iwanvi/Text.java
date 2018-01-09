@@ -106,9 +106,9 @@ public class Text {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws TextFilterException {
         //testExcel("g:\\敏感词.xls");
-        //System.out.println(checkText("GAME", 1, "习近平你好"));
-        System.out.println(TextFilterUtil.getRetouchedText("GAME", 1, "习近平你好, 周勇军挂了"));
+        //System.out.println(checkText("GAME", 1, "肛门拳交有需要的吗"));
+        System.out.println(TextFilterUtil.getRetouchedText("ZHIBO", 1, "肛门拳交有需要的吗"));
     }
 }
